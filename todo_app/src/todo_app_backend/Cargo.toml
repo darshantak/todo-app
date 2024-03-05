@@ -13,3 +13,4 @@ candid = "0.10"
 ic-cdk = "0.12"
 ic-cdk-timers = "0.6" # Feel free to remove this dependency if you don't need timers
 rand = "0.8.5"
+getrandom = {version= "0.2", features= ["js"]}
