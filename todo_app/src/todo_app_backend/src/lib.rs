@@ -1,8 +1,7 @@
-
+use candid::types::number::Nat;
 use candid::CandidType;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use candid::types::number::Nat;
 #[derive(CandidType, Clone)]
 struct Todo {
     id: Nat,
@@ -15,83 +14,71 @@ thread_local! {
     // static COUNTER : RefCell<Nat> = RefCell::new(Nat::from(0_u32));
 }
 
-
 #[ic_cdk::update]
-fn add_todo_item(item_name: String) {
-    let item_id = Nat::from(0_u32);
-    let new_todo = Todo {
-        id: item_id.clone(),
-        name: item_name.clone(),
-        completed: false,
-    };
-    let name = String::from("value");
-    TODO_CANISTER.with(|todo_item| {
-        todo_item
-            .borrow_mut()
-            .insert(name, new_todo.clone())
-    });
-
+fn backfill_todo_items(){
+    for i in 1..20{
+        let _ = add_todo_item(format!("test-{}",i));
+    }
 }
 
-// #[ic_cdk::update]
-// #[candid_method(update)]
-// fn add_todo_item(item_name: String) -> Result<Todo, String> {
-//     let id = generate_todo_id();
-//     let new_todo = Todo {
-//         id: id.clone(),
-//         name: item_name.clone(),
-//         completed: false,
-//     };
-
-//     TODO_CANISTER.with(|todo_item| {
-//         let mut todo_map = todo_item.borrow_mut();
-//         if let Some(existing_todo) = todo_map.get(&item_name) {
-//             Err(format!(
-//                 "Todo item with name '{}' already exists",
-//                 item_name
-//             ))
-//         } else {
-//             todo_map.insert(item_name.clone(), new_todo.clone());
-//             Ok(new_todo)
-//         }
-//     })
-// }
+#[ic_cdk::update]
+fn add_todo_item(item_name: String) -> Result<Todo, String> {
+    TODO_CANISTER.with(|todo_item| {
+        let mut todo_map = todo_item.borrow_mut();
+        let todo_size = todo_map.len();
+        let id: Nat = Nat::from(todo_size + 1);
+        let new_todo = Todo {
+            id: id.clone(),
+            name: item_name.clone(),
+            completed: false,
+        };
+        if let Some(existing_todo) = todo_map.get(&item_name) {
+            Err(format!(
+                "Todo item with name '{}' already exists",
+                item_name
+            ))
+        } else {
+            todo_map.insert(item_name.clone(), new_todo.clone());
+            Ok(new_todo)
+        }
+    })
+}
 
 #[ic_cdk::query]
 fn get_todo_by_name(name: String) -> Result<Todo, String> {
-    let todo_item = TODO_CANISTER.with(|todo_item| {
-        let todos = todo_item.borrow();
+    TODO_CANISTER.with(|todo_list| {
+        let todos = todo_list.borrow();
         for todo in todos.values() {
             if todo.name == name {
                 return Ok(todo.clone());
             }
         }
         Err("Not found".to_string())
-    });
-    todo_item
+    })
 }
 
 #[allow(unused)]
 #[ic_cdk::query]
-fn get_todos_pagination(page_size: usize) -> Vec<Todo> {
-    let mut current_page: Vec<Todo> = Vec::new();
+fn get_todos_pagination(page_size: Nat) -> Vec<Vec<Todo>> {
     let mut result: Vec<Vec<Todo>> = Vec::new();
     let mut processed_todos = 0;
-    let todo_items = TODO_CANISTER.with(|todo_cell| {
+    let mut current_page: Vec<Todo> = Vec::new();
+
+    TODO_CANISTER.with(|todo_cell| {
         let todos = todo_cell.borrow();
 
         for item in todos.values() {
-            current_page.push(item.clone()); // Cloning the todo item
+            current_page.push(item.clone()); 
             processed_todos += 1;
-
             if current_page.len() == page_size || processed_todos == todos.len() {
                 result.push(current_page.clone());
                 current_page.clear();
             }
         }
     });
-    result.into_iter().flatten().collect()
+    result
 }
+
 
 #[ic_cdk::update]
 fn update_todo(name: String, completed: bool) -> Result<(), String> {
@@ -135,4 +122,25 @@ fn delete_todo(name: String) -> Result<(), String> {
     } else {
         Err(format!("Todo item with name '{}' not found", name))
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add_todo(){
+        // let id = Nat::from(1);
+        let temp = add_todo_item("test".to_string());
+        let temp = add_todo_item("test-1".to_string());
+        let temp = add_todo_item("test-2".to_string());
+        let temp = add_todo_item("test-3".to_string());
+        let temp = add_todo_item("test-4".to_string());
+        let temp = add_todo_item("test-5".to_string());
+        let temp = add_todo_item("test-6".to_string());
+        let temp = add_todo_item("test-7".to_string());
+        let temp = add_todo_item("test-8".to_string());
+        let temp = add_todo_item("test-9".to_string());
+    }
+
 }

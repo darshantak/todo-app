@@ -1,6 +1,6 @@
 
 type Todo = record {
-    id: text;
+    id: nat;
     name: text;
     completed: bool;
 };
@@ -10,15 +10,17 @@ type TodoResult = variant {
     Err: text;
 };
 service : {
-
-    // Get Todo by Name
-    "get_todo_by_name": (name: text) -> (Todo) query;
-
-    // Get Todos Pagination
-    "get_todos_pagination": (page_size: nat) -> (vec Todo) query;
+    //Backfill Todos
+    "backfill_todo_items": () -> () ;
 
     // Add Todo
-    "add_todo_item": (item_name: text) -> () ;
+    "add_todo_item": (item_name: text) -> (TodoResult) ;
+
+    // Get Todo by Name
+    "get_todo_by_name": (name: text) -> (TodoResult) query;
+
+    // Get Todos Pagination
+    "get_todos_pagination": (page_size: nat) -> (vec vec Todo) query;
 
     // Update Todo
     "update_todo": (name: text, completed: bool) -> () ;
