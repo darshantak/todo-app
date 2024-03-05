@@ -1,6 +1,28 @@
+
+type Todo = record {
+    id: text;
+    name: text;
+    completed: bool;
+};
+
+type TodoResult = variant {
+    Ok: Todo;
+    Err: text;
+};
 service : {
-    "add_todo": (text) -> ();
-    "get_todo_by_name": (text) -> () query;
-    "get_todos_pagination": (text) -> (text);
-    "update_todo": (text,text)-> ();
+
+    // Get Todo by Name
+    "get_todo_by_name": (name: text) -> (Todo) query;
+
+    // Get Todos Pagination
+    "get_todos_pagination": (page_size: nat) -> (vec Todo) query;
+
+    // Add Todo
+    "add_todo_item": (item_name: text) -> () ;
+
+    // Update Todo
+    "update_todo": (name: text, completed: bool) -> () ;
+
+    // Delete Todo
+    "delete_todo": (name: text) -> ();
 }

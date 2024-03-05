@@ -1,31 +1,61 @@
+
+use candid::CandidType;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use candid::CandidType;
+use candid::types::number::Nat;
 #[derive(CandidType, Clone)]
 struct Todo {
-    id: String,
+    id: Nat,
     name: String,
     completed: bool,
 }
 
 thread_local! {
     static TODO_CANISTER : RefCell<HashMap<String,Todo>> = RefCell::new(HashMap::new());
+    // static COUNTER : RefCell<Nat> = RefCell::new(Nat::from(0_u32));
 }
 
+
 #[ic_cdk::update]
-fn add_todo(name: String) {
-    let id = generate_todo_id();
+fn add_todo_item(item_name: String) {
+    let item_id = Nat::from(0_u32);
     let new_todo = Todo {
-        id: id.clone(),
-        name: name.clone(),
+        id: item_id.clone(),
+        name: item_name.clone(),
         completed: false,
     };
+    let name = String::from("value");
     TODO_CANISTER.with(|todo_item| {
         todo_item
             .borrow_mut()
-            .insert(name.clone(), new_todo.clone())
+            .insert(name, new_todo.clone())
     });
+
 }
+
+// #[ic_cdk::update]
+// #[candid_method(update)]
+// fn add_todo_item(item_name: String) -> Result<Todo, String> {
+//     let id = generate_todo_id();
+//     let new_todo = Todo {
+//         id: id.clone(),
+//         name: item_name.clone(),
+//         completed: false,
+//     };
+
+//     TODO_CANISTER.with(|todo_item| {
+//         let mut todo_map = todo_item.borrow_mut();
+//         if let Some(existing_todo) = todo_map.get(&item_name) {
+//             Err(format!(
+//                 "Todo item with name '{}' already exists",
+//                 item_name
+//             ))
+//         } else {
+//             todo_map.insert(item_name.clone(), new_todo.clone());
+//             Ok(new_todo)
+//         }
+//     })
+// }
 
 #[ic_cdk::query]
 fn get_todo_by_name(name: String) -> Result<Todo, String> {
@@ -95,7 +125,7 @@ fn delete_todo(name: String) -> Result<(), String> {
                 deleted = true;
                 false
             } else {
-                true 
+                true
             }
         });
     });
@@ -105,8 +135,4 @@ fn delete_todo(name: String) -> Result<(), String> {
     } else {
         Err(format!("Todo item with name '{}' not found", name))
     }
-}
-
-fn generate_todo_id() -> String {
-    format!("todo-{}", rand::random::<u64>())
 }
