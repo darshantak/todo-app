@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-mod todo;
 use candid::CandidType;
-
-
 #[derive(CandidType, Clone)]
 struct Todo {
     id: String,
@@ -17,7 +14,7 @@ thread_local! {
 
 #[ic_cdk::update]
 fn add_todo(name: String) {
-    let id = todo::generate_todo_id();
+    let id = generate_todo_id();
     let new_todo = Todo {
         id: id.clone(),
         name: name.clone(),
@@ -108,4 +105,8 @@ fn delete_todo(name: String) -> Result<(), String> {
     } else {
         Err(format!("Todo item with name '{}' not found", name))
     }
+}
+
+fn generate_todo_id() -> String {
+    format!("todo-{}", rand::random::<u64>())
 }
