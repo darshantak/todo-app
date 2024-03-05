@@ -74,6 +74,6 @@ impl TodoCanister {
     }
 
 }
-fn generate_todo_id() -> String {
+pub fn generate_todo_id() -> String {
     format!("todo-{}", rand::random::<u64>())
 }

@@ -1,3 +1,6 @@
 service : {
-    "greet": (text) -> (text) query;
+    "add_todo": (text) -> ();
+    "get_todo_by_name": (text) -> () query;
+    "get_todos_pagination": (text) -> (text);
+    "update_todo": (text,text)-> ();
 }
