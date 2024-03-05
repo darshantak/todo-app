@@ -80,6 +80,7 @@ fn get_todos_pagination(page_size: Nat) -> Vec<Vec<Todo>> {
 }
 
 
+
 #[ic_cdk::update]
 fn update_todo(name: String, completed: bool) -> Result<(), String> {
     let mut updated = false;
