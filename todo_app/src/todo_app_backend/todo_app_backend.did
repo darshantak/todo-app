@@ -23,7 +23,7 @@ service : {
     "get_todos_pagination": (page_size: nat) -> (vec vec Todo) query;
 
     // Update Todo
-    "update_todo": (name: text, completed: bool) -> () ;
+    "update_todo": (name: text, completed: bool) -> (TodoResult) ;
 
     // Delete Todo
     "delete_todo": (name: text) -> ();

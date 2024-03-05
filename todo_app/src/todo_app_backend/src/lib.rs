@@ -82,23 +82,28 @@ fn get_todos_pagination(page_size: Nat) -> Vec<Vec<Todo>> {
 
 
 #[ic_cdk::update]
-fn update_todo(name: String, completed: bool) -> Result<(), String> {
+fn update_todo(name: String, completed: bool) -> Result<Todo, String> {
     let mut updated = false;
     TODO_CANISTER.with(|todo_cell| {
         let mut todo_items = todo_cell.borrow_mut();
+        let mut item_to_update = Todo{
+            id: Nat::from(1_u32),
+            name:"".to_string(),
+            completed:false
+        } ;
         for item in todo_items.values_mut() {
             if item.name == name {
                 item.completed = completed;
                 updated = true;
+                item_to_update = item.clone();
             }
         }
-    });
-
-    if updated {
-        Ok(())
-    } else {
-        Err(format!("Error updating the task"))
-    }
+        if updated {
+            Ok(item_to_update)
+        } else {
+            Err(format!("Error updating the task"))
+        }
+    })
 }
 
 #[ic_cdk::update]
