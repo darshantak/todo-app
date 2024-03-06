@@ -15,9 +15,9 @@ thread_local! {
 }
 
 #[ic_cdk::update]
-fn backfill_todo_items(){
-    for i in 1..20{
-        let _ = add_todo_item(format!("test-{}",i));
+fn backfill_todo_items() {
+    for i in 1..20 {
+        let _ = add_todo_item(format!("test-{}", i));
     }
 }
 
@@ -66,9 +66,12 @@ fn get_todos_pagination(page_size: Nat) -> Vec<Vec<Todo>> {
 
     TODO_CANISTER.with(|todo_cell| {
         let todos = todo_cell.borrow();
+        let mut todo_vec: Vec<&Todo> = todos.values().collect();
+        todo_vec.sort_by(|a, b| a.id.cmp(&b.id));
 
-        for item in todos.values() {
-            current_page.push(item.clone()); 
+        // for item in todos.values() {
+        for item in todo_vec {
+            current_page.push(item.clone());
             processed_todos += 1;
             if current_page.len() == page_size || processed_todos == todos.len() {
                 result.push(current_page.clone());
@@ -79,18 +82,16 @@ fn get_todos_pagination(page_size: Nat) -> Vec<Vec<Todo>> {
     result
 }
 
-
-
 #[ic_cdk::update]
 fn update_todo(name: String, completed: bool) -> Result<Todo, String> {
     let mut updated = false;
     TODO_CANISTER.with(|todo_cell| {
         let mut todo_items = todo_cell.borrow_mut();
-        let mut item_to_update = Todo{
+        let mut item_to_update = Todo {
             id: Nat::from(1_u32),
-            name:"".to_string(),
-            completed:false
-        } ;
+            name: "".to_string(),
+            completed: false,
+        };
         for item in todo_items.values_mut() {
             if item.name == name {
                 item.completed = completed;
@@ -135,7 +136,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_add_todo(){
+    fn test_add_todo() {
         // let id = Nat::from(1);
         let temp = add_todo_item("test".to_string());
         let temp = add_todo_item("test-1".to_string());
@@ -148,5 +149,4 @@ mod tests {
         let temp = add_todo_item("test-8".to_string());
         let temp = add_todo_item("test-9".to_string());
     }
-
 }
